@@ -2,8 +2,8 @@ import Image from 'next/image'
 
 const Hero = () => {
   return (
-    <section className="container mx-auto px-4 pt-32 pb-16">
-      <div className="mx-auto max-w-5xl">
+    <section className="w-full px-4 pt-32 pb-16">
+      <div className="mx-auto max-w-6xl">
         <h1 className="text-center text-6xl font-bold text-[#3D5690] mb-5">
           Your Drink, Ready When You Are
         </h1>
@@ -16,8 +16,7 @@ const Hero = () => {
               Why SkipLine?
             </h2>
             <p className="text-[#3D5690] mb-3">
-              SkipLine is a smarter way to get your daily drinks. We use a real-time queue system <br /> so you always know exactly how long your order will take
-              without guessing, waiting in line. Just order, show up, and enjoy.
+              SkipLine is a smarter way to get your daily drinks. We use a real-time queue system so you always know exactly how long your order will take without guessing, waiting in line. Just order, show up, and enjoy.
             </p>
             <button className="text-start bg-[#3D5690] text-[#EDEBDF] rounded-[5px] px-4 py-2 w-fit">
               Order Now
