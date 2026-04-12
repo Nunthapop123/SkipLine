@@ -1,13 +1,17 @@
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from app.core.database import get_db, engine
+from app.core.database import get_db, engine, Base
 from app import models
+from app.api.routes import auth
 
 # Create all database tables automatically on startup
-models.Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="SkipLine API")
+
+# Register standard routers
+app.include_router(auth.router, prefix="/api")
 
 @app.get("/")
 def health_check(db: Session = Depends(get_db)):
