@@ -2,7 +2,7 @@ import Image from 'next/image'
 
 const Hero = () => {
   return (
-    <section className="w-full px-4 pt-32 pb-16">
+    <section className="w-full px-4 pt-24 pb-16">
       <div className="mx-auto max-w-6xl">
         <h1 className="text-center text-6xl font-bold text-[#3D5690] mb-5">
           Your Drink, Ready When You Are
