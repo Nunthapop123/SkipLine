@@ -67,7 +67,7 @@ const Navbar = () => {
           </span>
           
           <div className="flex items-center gap-6">
-            <a href="#" className="text-[#3D5690] font-bold text-lg hover:opacity-80 transition-opacity">
+            <a href="/menu" className="text-[#3D5690] font-bold text-lg hover:opacity-80 transition-opacity">
               Menu
             </a>
             
