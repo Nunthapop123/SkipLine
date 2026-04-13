@@ -7,7 +7,7 @@ const RegisterPage = () => {
     <div className="flex min-h-screen flex-col bg-[#EDEBDF]">
       <Navbar />
       
-      <main className="flex-1 flex flex-col items-center pt-12 lg:pt-20 px-4 pb-12">
+      <main className="flex-1 flex flex-col items-center pt-24 px-4 pb-12">
         <div className="flex flex-col items-center text-center mb-8">
           <div className="w-20 h-20 bg-[#3D5690] rounded-2xl mb-6 shadow-sm"></div>
           <h1 className="text-5xl font-bold text-[#3D5690] mb-2">SkipLine</h1>
