@@ -7,14 +7,27 @@ import ProductImage from '../../../../components/menu/(individual)/ProductImage'
 import ProductInfo from '../../../../components/menu/(individual)/ProductInfo';
 import SizeSelector from '../../../../components/menu/(individual)/SizeSelector';
 import SweetnessSelector from '../../../../components/menu/(individual)/SweetnessSelector';
-import AddOnSection from '../../../../components/menu/(individual)/AddOnSection';
+import AddOnDisplay from '../../../../components/menu/(individual)/AddOnDisplay';
+import AddOnModal from '../../../../components/menu/(individual)/AddOnModal';
 import QuantitySelector from '../../../../components/menu/(individual)/QuantitySelector';
 import RelatedProducts from '../../../../components/menu/(individual)/RelatedProducts';
+
+interface AddOn {
+  id: string;
+  name: string;
+  price: number;
+}
 
 const MenuItemPage = ({ params }: { params: { id: string } }) => {
   const [size, setSize] = useState('Small');
   const [sweetness, setSweetness] = useState('50%');
   const [quantity, setQuantity] = useState(1);
+  const [selectedAddOns, setSelectedAddOns] = useState<AddOn[]>([]);
+  const [isAddOnModalOpen, setIsAddOnModalOpen] = useState(false);
+
+  const handleRemoveAddOn = (id: string) => {
+    setSelectedAddOns((prev) => prev.filter((item) => item.id !== id));
+  };
 
   // Fallback Product mock data 
   const product = {
@@ -35,7 +48,8 @@ const MenuItemPage = ({ params }: { params: { id: string } }) => {
   const calculateTotal = () => {
     const sizeObj = sizes.find(s => s.name === size);
     const addedPrice = sizeObj ? sizeObj.priceAdd : 0;
-    return (product.price + addedPrice) * quantity;
+    const addOnsTotal = selectedAddOns.reduce((sum, item) => sum + item.price, 0);
+    return (product.price + addedPrice + addOnsTotal) * quantity;
   };
 
   return (
@@ -69,7 +83,18 @@ const MenuItemPage = ({ params }: { params: { id: string } }) => {
                 onLevelChange={setSweetness}
               />
 
-              <AddOnSection />
+              <AddOnDisplay 
+                addOns={selectedAddOns}
+                onEdit={() => setIsAddOnModalOpen(true)}
+                onRemove={handleRemoveAddOn}
+              />
+
+              <AddOnModal 
+                isOpen={isAddOnModalOpen}
+                onClose={() => setIsAddOnModalOpen(false)}
+                onDone={setSelectedAddOns}
+                selectedAddOns={selectedAddOns}
+              />
 
               <QuantitySelector 
                 quantity={quantity}
