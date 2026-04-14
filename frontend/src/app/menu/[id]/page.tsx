@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useParams } from 'next/navigation';
 import Navbar from '../../../../components/Navbar';
 import Footer from '../../../../components/Footer';
 import ProductImage from '../../../../components/menu/(individual)/ProductImage';
@@ -11,6 +12,7 @@ import AddOnDisplay from '../../../../components/menu/(individual)/AddOnDisplay'
 import AddOnModal from '../../../../components/menu/(individual)/AddOnModal';
 import QuantitySelector from '../../../../components/menu/(individual)/QuantitySelector';
 import RelatedProducts from '../../../../components/menu/(individual)/RelatedProducts';
+import { getMenuProductById, type MenuProduct } from '../../../data/menuApi';
 
 interface AddOn {
   id: string;
@@ -18,30 +20,67 @@ interface AddOn {
   price: number;
 }
 
-const MenuItemPage = ({ params }: { params: { id: string } }) => {
+const cupMeta: Record<string, { volume: string; imageScale: number; icon: string }> = {
+  small: { volume: '12 Oz', imageScale: 48, icon: '/smallCup.png' },
+  medium: { volume: '16 Oz', imageScale: 56, icon: '/mediumCup.png' },
+  large: { volume: '20 Oz', imageScale: 64, icon: '/largeCup.png' },
+};
+
+const MenuItemPage = () => {
+  const params = useParams<{ id: string }>();
+  const productId = Number(params.id);
+
+  const [product, setProduct] = useState<MenuProduct | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [size, setSize] = useState('Small');
   const [sweetness, setSweetness] = useState('50%');
   const [quantity, setQuantity] = useState(1);
   const [selectedAddOns, setSelectedAddOns] = useState<AddOn[]>([]);
   const [isAddOnModalOpen, setIsAddOnModalOpen] = useState(false);
 
+  useEffect(() => {
+    const loadProduct = async () => {
+      setIsLoading(true);
+      const result = Number.isNaN(productId) ? null : await getMenuProductById(productId);
+      setProduct(result);
+      setIsLoading(false);
+    };
+
+    loadProduct();
+  }, [productId]);
+
   const handleRemoveAddOn = (id: string) => {
     setSelectedAddOns((prev) => prev.filter((item) => item.id !== id));
   };
 
-  // Fallback Product mock data 
-  const product = {
-    title: 'Milk Tea',
-    price: 20,
-    description: 'Lorem Ipsum is simply dummy text of the printing and typesetting simply dummy simply dummy',
-    image: '/frappes.png'
-  };
+  const productBasePrice = Number(product?.base_price || 0);
 
-  const sizes = [
-    { name: 'Small', volume: '12 Oz', priceAdd: 0, imageScale: 48, icon: '/smallCup.png' },
-    { name: 'Medium', volume: '16 Oz', priceAdd: 4, imageScale: 56, icon: '/mediumCup.png' },
-    { name: 'Large', volume: '20 Oz', priceAdd: 8, imageScale: 64, icon: '/largeCup.png' }
-  ];
+  const sizes = useMemo(() => {
+    if (!product || product.sizes.length === 0) {
+      return [
+        { name: 'Small', volume: '12 Oz', priceAdd: 0, imageScale: 48, icon: '/smallCup.png' },
+      ];
+    }
+
+    return product.sizes.map((item) => {
+      const key = item.size_name.trim().toLowerCase();
+      const meta = cupMeta[key] || { volume: '16 Oz', imageScale: 56, icon: '/mediumCup.png' };
+
+      return {
+        name: item.size_name,
+        volume: meta.volume,
+        priceAdd: Number(item.price_adjustment),
+        imageScale: meta.imageScale,
+        icon: meta.icon,
+      };
+    });
+  }, [product]);
+
+  useEffect(() => {
+    if (sizes.length > 0 && !sizes.some((item) => item.name === size)) {
+      setSize(sizes[0].name);
+    }
+  }, [sizes, size]);
 
   const sweetnessLevels = ['0%', '25%', '50%', '75%', '100%'];
 
@@ -49,8 +88,32 @@ const MenuItemPage = ({ params }: { params: { id: string } }) => {
     const sizeObj = sizes.find(s => s.name === size);
     const addedPrice = sizeObj ? sizeObj.priceAdd : 0;
     const addOnsTotal = selectedAddOns.reduce((sum, item) => sum + item.price, 0);
-    return (product.price + addedPrice + addOnsTotal) * quantity;
+    return Number(((productBasePrice + addedPrice + addOnsTotal) * quantity).toFixed(2));
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen flex-col bg-[#EDEBDF]">
+        <Navbar />
+        <main className="container flex-1 mx-auto pt-24 pb-20 px-4">
+          <div className="mx-auto max-w-6xl text-[#3D5690] text-xl font-bold">Loading menu item...</div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="flex min-h-screen flex-col bg-[#EDEBDF]">
+        <Navbar />
+        <main className="container flex-1 mx-auto pt-24 pb-20 px-4">
+          <div className="mx-auto max-w-6xl text-[#3D5690] text-xl font-bold">Menu item not found.</div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-[#EDEBDF]">
@@ -61,14 +124,14 @@ const MenuItemPage = ({ params }: { params: { id: string } }) => {
         <div className="mx-auto max-w-6xl">
           <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">
             
-            <ProductImage image={product.image} title={product.title} />
+            <ProductImage image={product.image_url || '/hotCoffee.png'} title={product.name} />
 
             <div className="w-full lg:w-7/12 flex flex-col justify-start">
               
               <ProductInfo 
-                title={product.title} 
+                title={product.name} 
                 price={calculateTotal()} 
-                description={product.description} 
+                description={product.description || 'No description available.'} 
               />
 
               <SizeSelector 

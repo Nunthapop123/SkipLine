@@ -1,13 +1,15 @@
 import Image from 'next/image';
+import Link from 'next/link';
 
 interface ProductCardProps {
+  id: number;
   title: string;
   price: string;
   imageSrc: string;
   description?: string;
 }
 
-const ProductCard = ({ title, price, imageSrc, description }: ProductCardProps) => {
+const ProductCard = ({ id, title, price, imageSrc, description }: ProductCardProps) => {
   return (
     <div className="bg-[#D9D9D9] rounded-2xl p-5 flex flex-col items-center shadow-sm w-full min-h-96">
       <div className="w-full flex justify-center mb-6 mt-4">
@@ -26,9 +28,9 @@ const ProductCard = ({ title, price, imageSrc, description }: ProductCardProps) 
         </p>
         <div className="w-full flex justify-between items-center gap-4">
           <span className="text-[#3D5690] font-bold text-xl">${price}</span>
-          <button className="bg-[#3D5690] text-[#EDEBDF] font-bold text-sm px-6 py-2 rounded-lg hover:bg-opacity-90 transition-all focus:outline-none shadow-sm">
+          <Link href={`/menu/${id}`} className="bg-[#3D5690] text-[#EDEBDF] font-bold text-sm px-6 py-2 rounded-lg hover:bg-opacity-90 transition-all focus:outline-none shadow-sm">
             View
-          </button>
+          </Link>
         </div>
       </div>
     </div>

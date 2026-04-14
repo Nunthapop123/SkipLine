@@ -17,6 +17,30 @@ class MenuService:
         return f"{Decimal(value):.2f}"
 
     @staticmethod
+    def _serialize_product(product: Product, sizes: list[ProductSize]) -> dict:
+        return {
+            "id": product.id,
+            "name": product.name,
+            "description": product.description,
+            "base_price": MenuService._format_price(product.base_price),
+            "image_url": product.image_url,
+            "is_available": product.is_available,
+            "category": {
+                "id": product.category.id,
+                "name": product.category.name,
+                "slug": MenuService._slugify(product.category.name),
+            },
+            "sizes": [
+                {
+                    "id": size.id,
+                    "size_name": size.size_name,
+                    "price_adjustment": MenuService._format_price(size.price_adjustment),
+                }
+                for size in sizes
+            ],
+        }
+
+    @staticmethod
     def get_categories(db: Session) -> list[dict]:
         categories = db.query(Category).order_by(Category.id.asc()).all()
 
@@ -71,28 +95,27 @@ class MenuService:
                 .all()
             )
 
-            results.append(
-                {
-                    "id": product.id,
-                    "name": product.name,
-                    "description": product.description,
-                    "base_price": MenuService._format_price(product.base_price),
-                    "image_url": product.image_url,
-                    "is_available": product.is_available,
-                    "category": {
-                        "id": product.category.id,
-                        "name": product.category.name,
-                        "slug": MenuService._slugify(product.category.name),
-                    },
-                    "sizes": [
-                        {
-                            "id": size.id,
-                            "size_name": size.size_name,
-                            "price_adjustment": MenuService._format_price(size.price_adjustment),
-                        }
-                        for size in sizes
-                    ],
-                }
-            )
+            results.append(MenuService._serialize_product(product, sizes))
 
         return results
+
+    @staticmethod
+    def get_product_by_id(db: Session, product_id: int) -> dict | None:
+        product = (
+            db.query(Product)
+            .join(Category, Product.category_id == Category.id)
+            .filter(Product.id == product_id)
+            .first()
+        )
+
+        if not product:
+            return None
+
+        sizes = (
+            db.query(ProductSize)
+            .filter(ProductSize.product_id == product.id)
+            .order_by(ProductSize.id.asc())
+            .all()
+        )
+
+        return MenuService._serialize_product(product, sizes)

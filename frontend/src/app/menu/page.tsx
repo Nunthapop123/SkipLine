@@ -46,6 +46,7 @@ const MenuPage = async () => {
                       {previewProducts.map((product) => (
                         <ProductCard 
                           key={product.id} 
+                          id={product.id}
                           title={product.name} 
                           price={formatPrice(product.base_price)} 
                           imageSrc={product.image_url || category.image_url} 

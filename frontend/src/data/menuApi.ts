@@ -51,6 +51,16 @@ export async function getMenuProducts(categorySlug?: string): Promise<MenuProduc
   }
 }
 
+export async function getMenuProductById(productId: number): Promise<MenuProduct | null> {
+  try {
+    const response = await fetch(`${API_BASE}/menu/products/${productId}`, { cache: 'no-store' });
+    if (!response.ok) return null;
+    return (await response.json()) as MenuProduct;
+  } catch {
+    return null;
+  }
+}
+
 export function formatPrice(price: string): string {
   const parsed = Number(price);
   if (Number.isNaN(parsed)) return price;
