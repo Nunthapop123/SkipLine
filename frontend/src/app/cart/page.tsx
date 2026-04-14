@@ -6,6 +6,7 @@ import Footer from '../../../components/Footer';
 import CartHeader from '../../../components/cart/CartHeader';
 import CartItemCard from '../../../components/cart/CartItemCard';
 import CartActions from '../../../components/cart/CartActions';
+import RemoveItemModal from '../../../components/cart/RemoveItemModal';
 import type { CartItem } from '../../../components/cart/types';
 
 const initialCartItems: CartItem[] = [
@@ -38,14 +39,30 @@ const initialCartItems: CartItem[] = [
 
 export default function CartPage() {
     const [cartItems, setCartItems] = useState<CartItem[]>(initialCartItems);
+    const [pendingRemoveItem, setPendingRemoveItem] = useState<CartItem | null>(null);
 
     const updateQuantity = (itemId: string, delta: number) => {
         setCartItems((prev) =>
             prev.map((item) => {
                 if (item.id !== itemId) return item;
+                if (delta < 0 && item.quantity === 1) {
+                    setPendingRemoveItem(item);
+                    return item;
+                }
                 return { ...item, quantity: Math.max(1, item.quantity + delta) };
             })
         );
+    };
+
+    const confirmRemoveItem = () => {
+        if (!pendingRemoveItem) return;
+
+        setCartItems((prev) => prev.filter((item) => item.id !== pendingRemoveItem.id));
+        setPendingRemoveItem(null);
+    };
+
+    const cancelRemoveItem = () => {
+        setPendingRemoveItem(null);
     };
 
     const toggleDetails = (itemId: string) => {
@@ -109,6 +126,13 @@ export default function CartPage() {
             </main>
 
             <Footer />
+
+            <RemoveItemModal
+                isOpen={Boolean(pendingRemoveItem)}
+                itemName={pendingRemoveItem?.name ?? ''}
+                onCancel={cancelRemoveItem}
+                onConfirm={confirmRemoveItem}
+            />
         </div>
     );
 }
