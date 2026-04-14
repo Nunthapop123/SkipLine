@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Navbar from '../../../../components/Navbar';
 import Footer from '../../../../components/Footer';
 import ProductImage from '../../../../components/menu/(individual)/ProductImage';
@@ -13,6 +13,7 @@ import AddOnModal from '../../../../components/menu/(individual)/AddOnModal';
 import QuantitySelector from '../../../../components/menu/(individual)/QuantitySelector';
 import RelatedProducts from '../../../../components/menu/(individual)/RelatedProducts';
 import { getMenuProductById, type MenuProduct } from '../../../data/menuApi';
+import { addToBackendCart, type CartItem } from '../../../data/cartApi';
 
 interface AddOn {
   id: string;
@@ -30,6 +31,7 @@ const cupMeta: Record<string, { volume: string; imageScale: number; icon: string
 const MenuItemPage = () => {
   const params = useParams<{ id: string }>();
   const productId = Number(params.id);
+  const router = useRouter();
 
   const [product, setProduct] = useState<MenuProduct | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,6 +40,8 @@ const MenuItemPage = () => {
   const [quantity, setQuantity] = useState(1);
   const [selectedAddOns, setSelectedAddOns] = useState<AddOn[]>([]);
   const [isAddOnModalOpen, setIsAddOnModalOpen] = useState(false);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [cartMessage, setCartMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -100,6 +104,62 @@ const MenuItemPage = () => {
     const addedPrice = sizeObj ? sizeObj.priceAdd : 0;
     const addOnsTotal = selectedAddOns.reduce((sum, item) => sum + item.price, 0);
     return Number(((productBasePrice + addedPrice + addOnsTotal) * quantity).toFixed(2));
+  };
+
+  const handleAddToCart = async () => {
+    if (!product) return;
+
+    // Check if user is logged in by checking localStorage for token
+    const token = typeof window !== 'undefined'
+      ? (localStorage.getItem('token') || localStorage.getItem('auth_token'))
+      : null;
+
+    if (!token) {
+      // User not authenticated - redirect to login
+      router.push('/login');
+      return;
+    }
+
+    setIsAddingToCart(true);
+    setCartMessage(null);
+
+    try {
+      const sizeObj = sizes.find((s) => s.name === size);
+      const unitPrice = productBasePrice + (sizeObj?.priceAdd || 0);
+      const sweetnessNum = parseInt(sweetness.replace('%', ''), 10);
+
+      const cartItem: CartItem = {
+        product_id: product.id,
+        size,
+        sweetness_level: sweetnessNum,
+        add_ons: selectedAddOns.map((addon) => ({
+          id: parseInt(addon.id, 10),
+          name: addon.name,
+          price: addon.price,
+        })),
+        addOns: selectedAddOns.map((addon) => ({
+          id: parseInt(addon.id, 10),
+          name: addon.name,
+          price: addon.price,
+        })),
+        quantity,
+        unit_price: unitPrice,
+      };
+
+      // User is logged in - save to backend
+      const result = await addToBackendCart(cartItem, token);
+      if (result) {
+        setCartMessage({ type: 'success', text: 'Added to cart!' });
+        window.dispatchEvent(new Event('cart-updated'));
+      } else {
+        setCartMessage({ type: 'error', text: 'Failed to add to cart. Please try again.' });
+      }
+    } catch (error) {
+      setCartMessage({ type: 'error', text: 'An error occurred. Please try again.' });
+      console.error('Add to cart error:', error);
+    } finally {
+      setIsAddingToCart(false);
+    }
   };
 
   useEffect(() => {
@@ -180,8 +240,22 @@ const MenuItemPage = () => {
                 onQuantityChange={setQuantity}
               />
 
-              <button className="w-full bg-[#3D5690] text-[#EDEBDF] font-bold text-lg py-3.5 rounded-xl hover:bg-[#2F4477] transition-all duration-200 shadow-[0_8px_30px_rgb(61,86,144,0.2)] hover:shadow-[0_8px_30px_rgb(61,86,144,0.3)] hover:-translate-y-1 active:translate-y-0">
-                Add to Cart
+              {cartMessage && (
+                <div className={`p-3 rounded-lg text-center font-semibold text-sm ${
+                  cartMessage.type === 'success'
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-red-100 text-red-700'
+                }`}>
+                  {cartMessage.text}
+                </div>
+              )}
+
+              <button
+                onClick={handleAddToCart}
+                disabled={isAddingToCart}
+                className="w-full bg-[#3D5690] text-[#EDEBDF] font-bold text-lg py-3.5 rounded-xl hover:bg-[#2F4477] transition-all duration-200 shadow-[0_8px_30px_rgb(61,86,144,0.2)] hover:shadow-[0_8px_30px_rgb(61,86,144,0.3)] hover:-translate-y-1 active:translate-y-0 disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                {isAddingToCart ? 'Adding...' : 'Add to Cart'}
               </button>
               
             </div>
