@@ -55,7 +55,7 @@ export default function CartItemCard({
                     >
                       <span className="text-[#3D5690] font-semibold text-base">{addOn.name}</span>
                       <div className="flex items-center gap-3">
-                        <span className="text-[#3D5690] font-semibold text-base">+ ${addOn.price.toFixed(0)}</span>
+                        <span className="text-[#3D5690] font-semibold text-base">+ ${addOn.price.toFixed(2)}</span>
                         <button
                           onClick={() => removeAddOn(item.id, addOn.id)}
                           className="text-[#3D5690]/60 hover:text-[#3D5690] text-lg font-bold transition-colors"
