@@ -22,6 +22,12 @@ export type MenuProduct = {
     size_name: string;
     price_adjustment: string;
   }>;
+  add_ons: Array<{
+    id: number;
+    name: string;
+    category: string;
+    price_adjustment: string;
+  }>;
 };
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://127.0.0.1:8000/api';

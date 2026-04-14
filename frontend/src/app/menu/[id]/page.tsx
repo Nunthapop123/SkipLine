@@ -18,6 +18,7 @@ interface AddOn {
   id: string;
   name: string;
   price: number;
+  category: string;
 }
 
 const cupMeta: Record<string, { volume: string; imageScale: number; icon: string }> = {
@@ -52,6 +53,16 @@ const MenuItemPage = () => {
   const handleRemoveAddOn = (id: string) => {
     setSelectedAddOns((prev) => prev.filter((item) => item.id !== id));
   };
+
+  const availableAddOns = useMemo(() => {
+    if (!product) return [];
+    return product.add_ons.map((item) => ({
+      id: String(item.id),
+      name: item.name,
+      category: item.category,
+      price: Number(item.price_adjustment),
+    }));
+  }, [product]);
 
   const productBasePrice = Number(product?.base_price || 0);
 
@@ -90,6 +101,10 @@ const MenuItemPage = () => {
     const addOnsTotal = selectedAddOns.reduce((sum, item) => sum + item.price, 0);
     return Number(((productBasePrice + addedPrice + addOnsTotal) * quantity).toFixed(2));
   };
+
+  useEffect(() => {
+    setSelectedAddOns((prev) => prev.filter((selected) => availableAddOns.some((item) => item.id === selected.id)));
+  }, [availableAddOns]);
 
   if (isLoading) {
     return (
@@ -157,6 +172,7 @@ const MenuItemPage = () => {
                 onClose={() => setIsAddOnModalOpen(false)}
                 onDone={setSelectedAddOns}
                 selectedAddOns={selectedAddOns}
+                availableAddOns={availableAddOns}
               />
 
               <QuantitySelector 

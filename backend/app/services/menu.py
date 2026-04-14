@@ -3,7 +3,7 @@ import re
 
 from sqlalchemy.orm import Session
 
-from app.models.product import Category, Product, ProductSize
+from app.models.product import AddOn, Category, Product, ProductSize
 
 
 class MenuService:
@@ -18,6 +18,15 @@ class MenuService:
 
     @staticmethod
     def _serialize_product(product: Product, sizes: list[ProductSize]) -> dict:
+        add_ons = (
+            sorted(
+                [add_on for add_on in product.add_ons if add_on.is_available],
+                key=lambda item: (item.category, item.name),
+            )
+            if product.add_ons
+            else []
+        )
+
         return {
             "id": product.id,
             "name": product.name,
@@ -37,6 +46,15 @@ class MenuService:
                     "price_adjustment": MenuService._format_price(size.price_adjustment),
                 }
                 for size in sizes
+            ],
+            "add_ons": [
+                {
+                    "id": add_on.id,
+                    "name": add_on.name,
+                    "category": add_on.category,
+                    "price_adjustment": MenuService._format_price(add_on.price_adjustment),
+                }
+                for add_on in add_ons
             ],
         }
 
