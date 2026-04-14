@@ -75,7 +75,7 @@ export default function TransactionCartSummary({
 
         <div className="my-5 h-0.5 bg-[#3D5690]/60" />
 
-        <div className="flex items-center justify-between py-2 text-xl font-bold leading-none md:text-2xl">
+        <div className="flex items-center justify-between py-2 text-[1.75rem] font-bold leading-none md:text-[1.95rem]">
           <span>Total</span>
           <span>{formatMoney(subtotal)}</span>
         </div>
