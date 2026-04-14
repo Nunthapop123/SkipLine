@@ -9,9 +9,12 @@ export default function CartActions() {
       >
         Continue Shopping
       </Link>
-      <button className="bg-[#3D5690] text-[#EDEBDF] font-bold text-lg px-10 py-3 rounded-lg hover:bg-[#2F4477] transition-colors">
+      <Link
+        href="/transaction"
+        className="bg-[#3D5690] text-[#EDEBDF] font-bold text-lg px-10 py-3 rounded-lg hover:bg-[#2F4477] transition-colors"
+      >
         Proceed to checkout
-      </button>
+      </Link>
     </div>
   );
 }
