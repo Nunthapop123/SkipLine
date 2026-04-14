@@ -37,14 +37,14 @@ export default function TransactionQueueStatus({
         </div>
       </div>
 
-      <div className="mt-4 flex flex-col justify-between gap-4 rounded-2xl bg-[#D9D9D9] px-6 py-5 text-[#3D5690] sm:flex-row sm:items-center">
+      <div className="mt-4 flex flex-col justify-between gap-5 rounded-2xl bg-[#D9D9D9] px-7 py-6 text-[#3D5690] sm:flex-row sm:items-center">
         <div>
-          <p className="text-lg font-bold leading-none md:text-xl">Ready around</p>
-          <p className="mt-2 max-w-[320px] text-sm font-semibold leading-5 opacity-80 md:text-xs">
+          <p className="text-xl font-bold leading-none md:text-2xl">Ready around</p>
+          <p className="mt-2 max-w-85 text-sm font-semibold leading-5 opacity-80 md:text-base">
             Estimated time may vary by up to 5 minutes based on order volume.
           </p>
         </div>
-        <p className="shrink-0 whitespace-nowrap text-3xl font-extrabold leading-none md:text-3xl">
+        <p className="shrink-0 whitespace-nowrap text-4xl font-extrabold leading-none md:text-4xl">
           11:32 AM
         </p>
       </div>

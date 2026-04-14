@@ -8,6 +8,7 @@ type TransactionCartSummaryProps = {
   cartItems: TransactionItem[];
   isLoading: boolean;
   subtotal: number;
+  onCheckout: () => void;
 };
 
 const formatMoney = (value: number) => `$${value.toFixed(2)}`;
@@ -16,6 +17,7 @@ export default function TransactionCartSummary({
   cartItems,
   isLoading,
   subtotal,
+  onCheckout,
 }: TransactionCartSummaryProps) {
   return (
     <aside>
@@ -78,7 +80,11 @@ export default function TransactionCartSummary({
           <span>{formatMoney(subtotal)}</span>
         </div>
 
-        <button className="mt-5 h-12 w-full rounded-xl bg-[#3D5690] text-base font-bold text-[#EDEBDF] transition-colors hover:bg-[#2F4477] md:h-11 md:text-lg">
+        <button
+          onClick={onCheckout}
+          disabled={isLoading || cartItems.length === 0}
+          className="mt-5 h-13 w-full rounded-xl bg-[#3D5690] text-lg font-bold text-[#EDEBDF] transition-colors hover:bg-[#2F4477] disabled:cursor-not-allowed disabled:opacity-60 md:text-xl"
+        >
           Checkout
         </button>
       </div>

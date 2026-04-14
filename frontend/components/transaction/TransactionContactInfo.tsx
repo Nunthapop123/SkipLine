@@ -10,7 +10,7 @@ export default function TransactionContactInfo() {
           <input
             type="text"
             placeholder="Enter your name"
-            className="h-12 w-full rounded-xl border-0 bg-[#D9D9D9] px-4 text-[#3D5690] placeholder:text-[#3D5690]/60 focus:outline-none md:h-10"
+            className="h-13 w-full rounded-xl border-0 bg-[#D9D9D9] px-4.5 text-[#3D5690] placeholder:text-[#3D5690]/60 focus:outline-none md:h-12"
           />
         </div>
 
@@ -20,7 +20,7 @@ export default function TransactionContactInfo() {
             <input
               type="email"
               placeholder="Enter your e-mail"
-              className="h-12 w-full rounded-xl border-0 bg-[#D9D9D9] px-4 text-[#3D5690] placeholder:text-[#3D5690]/60 focus:outline-none md:h-10"
+              className="h-13 w-full rounded-xl border-0 bg-[#D9D9D9] px-4.5 text-[#3D5690] placeholder:text-[#3D5690]/60 focus:outline-none md:h-12"
             />
           </div>
           <div>
@@ -28,7 +28,7 @@ export default function TransactionContactInfo() {
             <input
               type="tel"
               placeholder="Enter your phone number"
-              className="h-12 w-full rounded-xl border-0 bg-[#D9D9D9] px-4 text-[#3D5690] placeholder:text-[#3D5690]/60 focus:outline-none md:h-10"
+              className="h-13 w-full rounded-xl border-0 bg-[#D9D9D9] px-4.5 text-[#3D5690] placeholder:text-[#3D5690]/60 focus:outline-none md:h-12"
             />
           </div>
         </div>

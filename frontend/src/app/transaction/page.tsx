@@ -5,16 +5,22 @@ import { useEffect, useMemo, useState } from "react";
 import Navbar from "../../../components/Navbar";
 import Footer from "../../../components/Footer";
 import TransactionCartSummary from "../../../components/transaction/TransactionCartSummary";
+import TransactionCheckoutFlowModal from "../../../components/transaction/TransactionCheckoutFlowModal";
 import TransactionContactInfo from "../../../components/transaction/TransactionContactInfo";
 import TransactionPaymentMethod from "../../../components/transaction/TransactionPaymentMethod";
 import TransactionQueueStatus from "../../../components/transaction/TransactionQueueStatus";
 import { getBackendCart } from "../../data/cartApi";
 import type { PaymentMethod, TransactionItem } from "../../../components/transaction/types";
 
+type CheckoutFlowStep = "scan" | "verifying" | "success" | "failed" | null;
+
 export default function TransactionPage() {
   const [cartItems, setCartItems] = useState<TransactionItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card");
+  const [checkoutFlowStep, setCheckoutFlowStep] = useState<CheckoutFlowStep>(null);
+  const [receiptFileName, setReceiptFileName] = useState("");
+  const [orderId, setOrderId] = useState("");
 
   useEffect(() => {
     const loadCart = async () => {
@@ -66,6 +72,56 @@ export default function TransactionPage() {
   const prepTimePerCup = cartItems.length > 0 ? 2 : 0;
   const estimatedWait = cartItems.length > 0 ? 8 : 0;
 
+  const startVerification = (shouldSucceed: boolean) => {
+    setCheckoutFlowStep("verifying");
+
+    window.setTimeout(() => {
+      if (shouldSucceed) {
+        const generatedId = `SL-${Date.now().toString().slice(-6)}`;
+        setOrderId(generatedId);
+        setCheckoutFlowStep("success");
+        return;
+      }
+
+      setCheckoutFlowStep("failed");
+    }, 2200);
+  };
+
+  const handleCheckoutClick = () => {
+    if (!cartItems.length || isLoading) return;
+
+    setOrderId("");
+
+    if (paymentMethod === "promptpay") {
+      setCheckoutFlowStep("scan");
+      return;
+    }
+
+    setReceiptFileName("");
+    startVerification(true);
+  };
+
+  const handlePickReceipt = (file: File | null) => {
+    setReceiptFileName(file?.name ?? "");
+  };
+
+  const handleConfirmReceipt = () => {
+    if (!receiptFileName) return;
+
+    const isValidReceipt = receiptFileName === "successful.jpg";
+    startVerification(isValidReceipt);
+  };
+
+  const handleRetry = () => {
+    setCheckoutFlowStep("scan");
+  };
+
+  const handleCloseFlow = () => {
+    setCheckoutFlowStep(null);
+    setReceiptFileName("");
+    setOrderId("");
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-[#EDEBDF]">
       <Navbar />
@@ -92,10 +148,22 @@ export default function TransactionPage() {
               cartItems={cartItems}
               isLoading={isLoading}
               subtotal={subtotal}
+              onCheckout={handleCheckoutClick}
             />
           </div>
         </div>
       </main>
+
+      <TransactionCheckoutFlowModal
+        step={checkoutFlowStep}
+        subtotal={subtotal}
+        orderId={orderId}
+        receiptFileName={receiptFileName}
+        onPickReceipt={handlePickReceipt}
+        onConfirmReceipt={handleConfirmReceipt}
+        onRetry={handleRetry}
+        onClose={handleCloseFlow}
+      />
 
       <Footer />
     </div>
