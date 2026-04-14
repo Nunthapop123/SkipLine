@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from app.core.database import get_db, engine, Base
 from app import models
-from app.api.routes import auth
+from app.api.routes import auth, menu, cart
 
 # Create all database tables automatically on startup
 Base.metadata.create_all(bind=engine)
@@ -22,6 +22,8 @@ app.add_middleware(
 
 # Register standard routers
 app.include_router(auth.router, prefix="/api")
+app.include_router(menu.router, prefix="/api")
+app.include_router(cart.router, prefix="/api")
 
 @app.get("/")
 def health_check(db: Session = Depends(get_db)):

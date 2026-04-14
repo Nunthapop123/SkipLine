@@ -31,8 +31,9 @@ const LoginForm = () => {
       if (!response.ok) {
         setError(data.detail || 'Invalid email or password');
       } else {
-        // Success! Store the token securely in localStorage for now
+        // Store both keys for compatibility across pages.
         localStorage.setItem('token', data.access_token);
+        localStorage.setItem('auth_token', data.access_token);
         
         // Redirect to dashboard or home
         window.location.href = '/'; 

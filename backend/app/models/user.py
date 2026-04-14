@@ -24,3 +24,4 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc))
 
     orders = relationship("Order", back_populates="customer")
+    cart = relationship("Cart", back_populates="user", uselist=False, cascade="all, delete-orphan")

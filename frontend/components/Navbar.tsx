@@ -3,12 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import { ShoppingBag } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { getBackendCart } from '../src/data/cartApi';
 
 const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState('Loading...'); 
   const [userEmail, setUserEmail] = useState('');
+  const [cartCount, setCartCount] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
@@ -35,8 +37,20 @@ const Navbar = () => {
       }
     };
 
+    const fetchCartCount = async (token: string) => {
+      try {
+        const cart = await getBackendCart(token);
+        const count = Array.isArray(cart?.items)
+          ? cart.items.reduce((sum: number, item: { quantity?: number }) => sum + (item.quantity || 0), 0)
+          : 0;
+        setCartCount(count);
+      } catch {
+        setCartCount(0);
+      }
+    };
+
     // Look for the auth token right when the Navigation bar loads
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
     const storedName = localStorage.getItem('userName');
     
     if (token) {
@@ -45,13 +59,26 @@ const Navbar = () => {
         setUserName(storedName);
       }
       fetchUserData(token);
+      fetchCartCount(token);
     }
+
+    const onCartUpdated = () => {
+      const refreshedToken = localStorage.getItem('token') || localStorage.getItem('auth_token');
+      if (refreshedToken) {
+        fetchCartCount(refreshedToken);
+      }
+    };
+
+    window.addEventListener('cart-updated', onCartUpdated);
+    return () => window.removeEventListener('cart-updated', onCartUpdated);
   }, []);
 
   const handleSignOut = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('auth_token');
     setIsLoggedIn(false);
     setIsDropdownOpen(false);
+    setCartCount(0);
     router.push('/login');
   };
 
@@ -74,8 +101,17 @@ const Navbar = () => {
             {isLoggedIn ? (
               // Logged in State
               <>
-                <button className="text-[#3D5690] hover:text-[#2F4477] transition-colors focus:outline-none">
+                <button
+                  onClick={() => router.push('/cart')}
+                  className="relative text-[#3D5690] hover:text-[#2F4477] transition-colors focus:outline-none"
+                  aria-label="Open cart"
+                >
                   <ShoppingBag size={32} strokeWidth={2.2} />
+                  {cartCount > 0 && (
+                    <span className="absolute -top-2 -right-2 min-w-5 h-5 px-1 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center leading-none">
+                      {cartCount > 99 ? '99+' : cartCount}
+                    </span>
+                  )}
                 </button>
 
                 <div className="relative">
