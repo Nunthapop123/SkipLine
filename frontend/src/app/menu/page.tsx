@@ -7,10 +7,17 @@ import MenuBanner from '../../../components/menu/MenuBanner';
 import MenuSearchBar from '../../../components/menu/MenuSearchBar';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-import { categoriesData } from '../../data/menuData';
+import { formatPrice, getMenuCategories, getMenuProducts } from '../../data/menuApi';
 
-const MenuPage = () => {
-  const categoryKeys = ['hot-coffee', 'ice-coffee', 'tea-matcha', 'frappes-blended', 'refreshers'];
+const MenuPage = async () => {
+  const [categories, products] = await Promise.all([getMenuCategories(), getMenuProducts()]);
+
+  const productsByCategory = products.reduce<Record<string, typeof products>>((acc, product) => {
+    const key = product.category.slug;
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(product);
+    return acc;
+  }, {});
 
   return (
     <div className="flex min-h-screen flex-col bg-[#EDEBDF]">
@@ -21,31 +28,28 @@ const MenuPage = () => {
           <MenuSearchBar />
 
           <div className="flex flex-col md:flex-row gap-8">
-            <CategoriesSidebar />
+            <CategoriesSidebar categories={categories} />
 
             <section className="flex-1 flex flex-col gap-14">
-              {categoryKeys.map((key) => {
-                const category = categoriesData[key];
-                if (!category) return null;
-                
-
-                const previewProducts = category.products.slice(0, 3);
+              {categories.map((category) => {
+                const previewProducts = (productsByCategory[category.slug] || []).slice(0, 3);
                 
                 return (
-                  <div key={key}>
+                  <div key={category.id}>
                     <div className="flex justify-between items-end mb-6 px-2">
-                      <h2 className="text-2xl font-bold text-[#3D5690]">{category.title}</h2>
-                      <Link href={`/menu/categories/${key}`} className="flex items-center gap-1.5 text-[#3D5690] text-base font-bold hover:opacity-70 transition-opacity">
+                      <h2 className="text-2xl font-bold text-[#3D5690]">{category.name}</h2>
+                      <Link href={`/menu/categories/${category.slug}`} className="flex items-center gap-1.5 text-[#3D5690] text-base font-bold hover:opacity-70 transition-opacity">
                         See More <ArrowRight size={16} strokeWidth={2.5} />
                       </Link>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {previewProducts.map((product: any) => (
+                      {previewProducts.map((product) => (
                         <ProductCard 
                           key={product.id} 
-                          title={product.title} 
-                          price={product.price} 
-                          imageSrc={category.image} 
+                          title={product.name} 
+                          price={formatPrice(product.base_price)} 
+                          imageSrc={product.image_url || category.image_url} 
+                          description={product.description || undefined}
                         />
                       ))}
                     </div>
