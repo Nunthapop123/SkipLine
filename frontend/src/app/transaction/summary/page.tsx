@@ -30,7 +30,7 @@ const formatPickupTime = (isoDate?: string | null) => {
   if (!isoDate) return "--:--";
   const date = new Date(isoDate);
   if (Number.isNaN(date.getTime())) return "--:--";
-  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
 };
 
 export default function TransactionSummaryPage() {
@@ -187,7 +187,7 @@ export default function TransactionSummaryPage() {
                 Back to menu
               </Link>
               <Link
-                href="/transaction"
+                href="/my-order"
                 className="flex h-12 items-center justify-center gap-2 rounded-md bg-[#3D5690] text-sm font-bold text-[#EDEBDF] transition-opacity hover:opacity-90 sm:h-13 sm:text-base"
               >
                 Track Order

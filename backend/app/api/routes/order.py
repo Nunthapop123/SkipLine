@@ -17,6 +17,15 @@ from app.services.order import OrderService
 router = APIRouter(prefix="/orders", tags=["Orders"])
 
 
+@router.get("", response_model=list[OrderResponse])
+def get_user_orders(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Get all orders for the current user"""
+    return OrderService.get_user_orders(db, user_id=current_user.id)
+
+
 @router.get("/estimate-from-cart", response_model=OrderQueueEstimateResponse)
 def estimate_from_cart(
     current_user: User = Depends(get_current_user),

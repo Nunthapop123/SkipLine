@@ -137,7 +137,7 @@ const Navbar = () => {
                           <p className="text-sm text-gray-500 truncate mt-0.5">{userEmail}</p>
                         </div>
                         <div className="py-2 border-b border-gray-100">
-                          <a href="#" className="block px-5 py-2.5 text-sm text-[#3D5690] font-semibold hover:bg-gray-50">
+                          <a href="/my-order" className="block px-5 py-2.5 text-sm text-[#3D5690] font-semibold hover:bg-gray-50">
                             My Orders
                           </a>
                           <a href="#" className="block px-5 py-2.5 text-sm text-[#3D5690] font-semibold hover:bg-gray-50">
