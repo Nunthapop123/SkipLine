@@ -12,6 +12,7 @@ export type MenuProduct = {
   base_price: string;
   image_url: string | null;
   is_available: boolean;
+  stock_quantity: number;
   category: {
     id: number;
     name: string;

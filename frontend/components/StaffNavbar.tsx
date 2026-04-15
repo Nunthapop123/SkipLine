@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 
 const StaffNavbar = () => {
   const [userName, setUserName] = useState('Staff');
+  const [role, setRole] = useState('STAFF');
   const router = useRouter();
   const pathname = usePathname();
 
@@ -13,18 +14,37 @@ const StaffNavbar = () => {
     if (storedName) {
       setUserName(storedName);
     }
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        setRole(user.role || 'STAFF');
+      } catch (e) {
+        console.error('Failed to parse user from localStorage', e);
+      }
+    }
   }, []);
 
   const handleSignOut = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('auth_token');
     localStorage.removeItem('userName');
+    localStorage.removeItem('user');
     router.push('/staff/login');
   };
 
   const navItems = [
     { name: 'Order Board', path: '/staff/dashboard' },
   ];
+
+  if (role === 'ADMIN') {
+    navItems.push(
+      { name: 'Menu Management', path: '/admin/menu' },
+      { name: 'Inventory Control', path: '/admin/inventory' },
+      { name: 'System Settings', path: '/admin/settings' },
+      { name: 'Analytics', path: '/admin/analytics' }
+    );
+  }
 
   return (
     <aside className="h-screen w-[400px] bg-[#EAE8DF] border-r border-[#3D5690]/10 flex flex-col p-10 z-50 shadow-[4px_0_24px_rgba(0,0,0,0.02)] shrink-0">
@@ -68,7 +88,9 @@ const StaffNavbar = () => {
           </div>
           <div className="flex flex-col">
             <span className="text-[#465985] font-bold text-sm leading-tight">{userName}</span>
-            <span className="text-[10px] font-bold text-[#465985]/40 uppercase tracking-wider mt-0.5">Authorized Staff</span>
+            <span className="text-[10px] font-bold text-[#465985]/40 uppercase tracking-wider mt-0.5">
+              {role === 'ADMIN' ? 'Shop Manager' : 'Authorized Staff'}
+            </span>
           </div>
         </div>
         
