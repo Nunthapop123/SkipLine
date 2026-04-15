@@ -26,6 +26,9 @@ const Navbar = () => {
           const data = await response.json();
           setUserName(data.name);
           setUserEmail(data.email);
+          if (data.phone) {
+            localStorage.setItem('userPhone', data.phone);
+          }
           // Sync exact name back to local storage globally too
           localStorage.setItem('userName', data.name);
         } else {
