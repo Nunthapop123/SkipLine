@@ -4,12 +4,14 @@ type TransactionQueueStatusProps = {
   ordersAhead: number;
   prepTimePerCup: number;
   estimatedWait: number;
+  readyAroundTime: string;
 };
 
 export default function TransactionQueueStatus({
   ordersAhead,
   prepTimePerCup,
   estimatedWait,
+  readyAroundTime,
 }: TransactionQueueStatusProps) {
   return (
     <section>
@@ -45,7 +47,7 @@ export default function TransactionQueueStatus({
           </p>
         </div>
         <p className="shrink-0 whitespace-nowrap text-4xl font-extrabold leading-none md:text-4xl">
-          11:32 AM
+          {readyAroundTime}
         </p>
       </div>
     </section>

@@ -35,6 +35,7 @@ class AuthenticationService:
         new_user = User(
             name=user_in.name,
             email=user_in.email,
+            phone=user_in.phone,
             password_hash=get_password_hash(user_in.password),
             # Role natively defaults to CUSTOMER based on the Model
         )

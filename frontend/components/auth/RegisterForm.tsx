@@ -92,7 +92,7 @@ const RegisterForm = () => {
       const response = await fetch('http://127.0.0.1:8000/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, email, phone: phone || null, password }),
       });
       
       const data = await response.json();

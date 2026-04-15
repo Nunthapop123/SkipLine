@@ -188,7 +188,7 @@ export default function CartPage() {
                             </div>
                         )}
 
-                        <CartActions />
+                        <CartActions canCheckout={cartItemCount > 0} />
                     </section>
                 </div>
             </main>
