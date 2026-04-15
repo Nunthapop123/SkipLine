@@ -26,6 +26,7 @@ class ProductBase(BaseModel):
     base_price: Decimal
     image_url: Optional[str] = None
     is_available: bool = True
+    stock_quantity: int = 0
     category_id: int
 
 class ProductCreate(ProductBase):

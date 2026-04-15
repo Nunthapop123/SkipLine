@@ -20,6 +20,7 @@ class Product(Base):
     base_price = Column(Numeric(10, 2), nullable=False)
     image_url = Column(String)
     is_available = Column(Boolean, default=True)
+    stock_quantity = Column(Integer, default=0)
 
     category = relationship("Category", back_populates="products")
     sizes = relationship("ProductSize", back_populates="product", cascade="all, delete-orphan")
