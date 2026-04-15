@@ -18,6 +18,8 @@ export default function CartPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [pendingRemoveItem, setPendingRemoveItem] = useState<CartItem | null>(null);
 
+    const [isBusyMode, setIsBusyMode] = useState(false);
+
     // Load cart from backend on mount
     useEffect(() => {
         const loadCart = async () => {
@@ -31,6 +33,17 @@ export default function CartPage() {
                     // Not authenticated - redirect to login
                     router.push('/login');
                     return;
+                }
+
+                // Check for Busy Mode while loading cart
+                try {
+                    const settingsResponse = await fetch('http://127.0.0.1:8000/api/menu/settings');
+                    if (settingsResponse.ok) {
+                        const settings = await settingsResponse.json();
+                        setIsBusyMode(settings.is_busy_mode_active);
+                    }
+                } catch (e) {
+                    console.error('Failed to fetch store settings:', e);
                 }
 
                 const backendCart = await getBackendCart(token);
@@ -167,6 +180,15 @@ export default function CartPage() {
             <main className="container flex-1 mx-auto pt-16 pb-16 px-4">
                 <div className="mx-auto max-w-6xl">
                     <section className="w-full rounded-[10px] py-8">
+                        {isBusyMode && (
+                          <div className="mb-6 bg-[#E55B5B]/10 border-2 border-[#E55B5B] p-6 rounded-2xl flex items-center gap-4">
+                            <span className="text-2xl">⚠️</span>
+                            <div>
+                              <h3 className="text-[#E55B5B] font-bold">Store is Currently Busy</h3>
+                              <p className="text-[#E55B5B]/80 text-sm font-medium">We're pausing new orders to ensure quality service. Please check back in a few minutes!</p>
+                            </div>
+                          </div>
+                        )}
                         <CartHeader cartItemCount={cartItemCount} cartTotal={cartTotal} />
 
                         {cartItems.length === 0 ? (
@@ -188,7 +210,7 @@ export default function CartPage() {
                             </div>
                         )}
 
-                        <CartActions canCheckout={cartItemCount > 0} />
+                        <CartActions canCheckout={cartItemCount > 0 && !isBusyMode} />
                     </section>
                 </div>
             </main>

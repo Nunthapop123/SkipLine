@@ -14,6 +14,7 @@ from app.schemas.order import (
     UpdateOrderStatusRequest,
 )
 from app.models.user import UserRole
+from app.models.store import StoreSettings
 from app.services.order import OrderService
 
 router = APIRouter(prefix="/orders", tags=["Orders"])
@@ -42,6 +43,14 @@ def create_order_from_cart(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    # Check for Busy Mode
+    settings = db.query(StoreSettings).first()
+    if settings and settings.is_busy_mode_active:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Store is currently in 'Busy Mode'. Please try again in a few minutes."
+        )
+        
     try:
         return OrderService.create_order_from_cart(
             db,

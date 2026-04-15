@@ -240,6 +240,15 @@ const MenuItemPage = () => {
                 onQuantityChange={setQuantity}
               />
 
+              {product.stock_quantity <= 0 && (
+                <div className="mb-4 p-3 bg-red-50 border-2 border-red-200 rounded-xl flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+                  <span className="text-red-700 font-bold text-sm uppercase tracking-wide">
+                    Out of Stock - Currently Unavailable
+                  </span>
+                </div>
+              )}
+
               {cartMessage && (
                 <div className={`p-3 rounded-lg text-center font-semibold text-sm ${
                   cartMessage.type === 'success'
@@ -252,10 +261,10 @@ const MenuItemPage = () => {
 
               <button
                 onClick={handleAddToCart}
-                disabled={isAddingToCart}
-                className="w-full bg-[#3D5690] text-[#EDEBDF] font-bold text-lg py-3.5 rounded-xl hover:bg-[#2F4477] transition-all duration-200 shadow-[0_8px_30px_rgb(61,86,144,0.2)] hover:shadow-[0_8px_30px_rgb(61,86,144,0.3)] hover:-translate-y-1 active:translate-y-0 disabled:opacity-70 disabled:cursor-not-allowed"
+                disabled={isAddingToCart || product.stock_quantity <= 0}
+                className="w-full bg-[#3D5690] text-[#EDEBDF] font-bold text-lg py-3.5 rounded-xl hover:bg-[#2F4477] transition-all duration-200 shadow-[0_8px_30px_rgb(61,86,144,0.2)] hover:shadow-[0_8px_30px_rgb(61,86,144,0.3)] hover:-translate-y-1 active:translate-y-0 disabled:opacity-70 disabled:grayscale disabled:cursor-not-allowed"
               >
-                {isAddingToCart ? 'Adding...' : 'Add to Cart'}
+                {isAddingToCart ? 'Adding...' : product.stock_quantity <= 0 ? 'OUT OF STOCK' : 'Add to Cart'}
               </button>
               
             </div>

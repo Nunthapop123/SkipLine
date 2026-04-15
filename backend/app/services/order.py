@@ -330,3 +330,28 @@ class OrderService:
         db.commit()
         db.refresh(order)
         return order
+
+    @staticmethod
+    def get_daily_analytics(db: Session) -> dict[str, object]:
+        """Get analytics for today (total orders, total sales)"""
+        now = datetime.now(timezone.utc)
+        today_start = datetime(now.year, now.month, now.day, tzinfo=timezone.utc)
+        
+        # Count all orders created today that are at least CONFIRMED
+        orders_today = (
+            db.query(Order)
+            .filter(
+                Order.created_at >= today_start,
+                Order.status != OrderStatus.PENDING_PAYMENT
+            )
+            .all()
+        )
+        
+        total_orders = len(orders_today)
+        total_sales = sum(o.total_amount for o in orders_today)
+        
+        return {
+            "total_orders": total_orders,
+            "total_sales": total_sales,
+            "period": today_start.strftime("%Y-%m-%d")
+        }

@@ -6,12 +6,18 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from app.core.database import get_db, engine, Base
 from app import models
-from app.api.routes import auth, menu, cart, order
+from app.api.routes import auth, menu, cart, order, admin
+from fastapi.staticfiles import StaticFiles
+import os
 
 # Create all database tables automatically on startup
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="SkipLine API")
+
+# Mount static files
+os.makedirs("uploads", exist_ok=True)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
@@ -35,6 +41,7 @@ app.include_router(auth.router, prefix="/api")
 app.include_router(menu.router, prefix="/api")
 app.include_router(cart.router, prefix="/api")
 app.include_router(order.router, prefix="/api")
+app.include_router(admin.router, prefix="/api")
 
 @app.get("/")
 def health_check(db: Session = Depends(get_db)):
