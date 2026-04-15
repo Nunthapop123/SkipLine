@@ -15,9 +15,9 @@ const Footer = () => {
             <div>
               <p className="text-white/50 text-xs font-bold tracking-widest uppercase mb-4">Quick Links</p>
               <ul className="space-y-3">
-                <li><a href="#" className="text-white/80 text-sm font-bold hover:text-white transition-colors">Menu</a></li>
-                <li><a href="#" className="text-white/80 text-sm font-bold hover:text-white transition-colors">Track My Order</a></li>
-                <li><a href="#" className="text-white/80 text-sm font-bold hover:text-white transition-colors">Sign In</a></li>
+                <li><a href="/menu" className="text-white/80 text-sm font-bold hover:text-white transition-colors">Menu</a></li>
+                <li><a href="/my-order" className="text-white/80 text-sm font-bold hover:text-white transition-colors">Track My Order</a></li>
+                <li><a href="/login" className="text-white/80 text-sm font-bold hover:text-white transition-colors">Sign In</a></li>
                 <li><a href="#" className="text-white/80 text-sm font-bold hover:text-white transition-colors">Staff Portal</a></li>
               </ul>
             </div>
