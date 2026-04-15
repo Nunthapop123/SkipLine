@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { ShoppingBag } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { getBackendCart } from '../src/data/cartApi';
 
 const Navbar = () => {
@@ -89,12 +90,21 @@ const Navbar = () => {
     <nav className="container mx-auto px-4 pt-10">
       <div className="mx-auto max-w-6xl">
         <div className="flex items-center justify-between">
-          <span 
-            className="text-3xl font-bold text-[#3D5690] cursor-pointer"
+          <div 
+            className="flex items-center gap-2 cursor-pointer"
             onClick={() => router.push('/')}
           >
-            SkipLine
-          </span>
+            <Image 
+              src="/kid_logo.png" 
+              alt="SkipLine Logo" 
+              width={36} 
+              height={36}
+              className="object-contain"
+            />
+            <span className="text-3xl font-bold text-[#3D5690]">
+              SkipLine
+            </span>
+          </div>
           
           <div className="flex items-center gap-6">
             <a href="/menu" className="text-[#3D5690] font-bold text-lg hover:opacity-80 transition-opacity">

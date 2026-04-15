@@ -12,6 +12,7 @@ from app.models.store import StoreSettings
 from app.schemas.product import ProductResponse, ProductCreate, ProductBase
 from app.schemas.store import StoreSettingsResponse, StoreSettingsUpdate
 from app.services.order import OrderService
+from app.services.admin import AdminService
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
@@ -55,7 +56,7 @@ def get_all_products(
     admin: User = Depends(check_admin_access)
 ):
     """Get all products for inventory/menu management"""
-    return db.query(Product).all()
+    return AdminService.get_all_products(db)
 
 @router.post("/products", response_model=ProductResponse)
 def create_product(
@@ -64,37 +65,7 @@ def create_product(
     admin: User = Depends(check_admin_access)
 ):
     """Create a new menu item and inherit sizes/add-ons from category siblings"""
-    product = Product(**payload.model_dump())
-    db.add(product)
-    db.flush() # Get product.id without committing
-
-    # Find a sibling product in the same category to use as a template
-    sibling = db.query(Product).filter(
-        Product.category_id == product.category_id,
-        Product.id != product.id
-    ).first()
-
-    if sibling:
-        # Copy sizes
-        for size in sibling.sizes:
-            new_size = ProductSize(
-                product_id=product.id,
-                size_name=size.size_name,
-                price_adjustment=size.price_adjustment
-            )
-            db.add(new_size)
-        
-        # Copy add-ons
-        for pa in sibling.product_add_ons:
-            new_pa = ProductAddOn(
-                product_id=product.id,
-                add_on_id=pa.add_on_id
-            )
-            db.add(new_pa)
-
-    db.commit()
-    db.refresh(product)
-    return product
+    return AdminService.create_product(db, payload)
 
 @router.patch("/products/{product_id}", response_model=ProductResponse)
 def update_product(
@@ -104,17 +75,7 @@ def update_product(
     admin: User = Depends(check_admin_access)
 ):
     """Update product details (price, stock, availability, etc.)"""
-    product = db.query(Product).filter(Product.id == product_id).first()
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
-    
-    for key, value in payload.items():
-        if hasattr(product, key):
-            setattr(product, key, value)
-    
-    db.commit()
-    db.refresh(product)
-    return product
+    return AdminService.update_product(db, product_id, payload)
 
 @router.delete("/products/{product_id}")
 def delete_product(
@@ -123,13 +84,7 @@ def delete_product(
     admin: User = Depends(check_admin_access)
 ):
     """Delete a menu item"""
-    product = db.query(Product).filter(Product.id == product_id).first()
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
-    
-    db.delete(product)
-    db.commit()
-    return {"message": "Product deleted successfully"}
+    return AdminService.delete_product(db, product_id)
 
 # --- Store Settings ---
 
@@ -139,13 +94,7 @@ def get_settings(
     admin: User = Depends(check_admin_access)
 ):
     """Get global store settings (Busy Mode, etc.)"""
-    settings = db.query(StoreSettings).first()
-    if not settings:
-        settings = StoreSettings() # Should ideally be seeded
-        db.add(settings)
-        db.commit()
-        db.refresh(settings)
-    return settings
+    return AdminService.get_settings(db)
 
 @router.patch("/settings", response_model=StoreSettingsResponse)
 def update_settings(
@@ -154,16 +103,7 @@ def update_settings(
     admin: User = Depends(check_admin_access)
 ):
     """Update global store settings (Toggle Busy Mode)"""
-    settings = db.query(StoreSettings).first()
-    if not settings:
-        raise HTTPException(status_code=404, detail="Settings not found")
-    
-    for key, value in payload.model_dump(exclude_unset=True).items():
-        setattr(settings, key, value)
-    
-    db.commit()
-    db.refresh(settings)
-    return settings
+    return AdminService.update_settings(db, payload.model_dump(exclude_unset=True))
 
 # --- Performance Analytics ---
 
@@ -173,4 +113,4 @@ def get_daily_stats(
     admin: User = Depends(check_admin_access)
 ):
     """Get performance metrics for today"""
-    return OrderService.get_daily_analytics(db)
+    return AdminService.get_daily_stats(db)

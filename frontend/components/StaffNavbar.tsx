@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import Image from 'next/image';
 
 const StaffNavbar = () => {
   const [userName, setUserName] = useState('Staff');
@@ -51,14 +52,23 @@ const StaffNavbar = () => {
       {/* Logo Area */}
       <div className="flex items-center justify-between mb-12">
         <div 
-          className="cursor-pointer"
+          className="cursor-pointer flex items-center gap-3"
           onClick={() => router.push('/staff/dashboard')}
         >
-          <span className="text-3xl font-bold text-[#3D5690] tracking-tight">
-            SkipLine
-          </span>
-          <div className="text-[10px] font-bold opacity-30 uppercase tracking-[0.2em] mt-1 ml-0.5">
-            Staff Portal
+          <Image 
+            src="/kid_logo.png" 
+            alt="SkipLine Logo" 
+            width={40} 
+            height={40}
+            className="object-contain"
+          />
+          <div>
+            <span className="text-3xl font-bold text-[#3D5690] tracking-tight">
+              SkipLine
+            </span>
+            <div className="text-[10px] font-bold opacity-30 uppercase tracking-[0.2em] mt-1 ml-0.5">
+              Staff Portal
+            </div>
           </div>
         </div>
       </div>
