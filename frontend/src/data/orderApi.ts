@@ -119,3 +119,17 @@ export async function getOrderEstimateFromCart(token: string): Promise<OrderQueu
     return null;
   }
 }
+
+export async function getUserOrders(token: string): Promise<OrderResponse[]> {
+  try {
+    const response = await fetch(`${API_BASE}/orders`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+
+    if (!response.ok) return [];
+    return (await response.json()) as OrderResponse[];
+  } catch {
+    return [];
+  }
+}
