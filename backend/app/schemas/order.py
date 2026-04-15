@@ -22,7 +22,7 @@ class OrderItemProductResponse(BaseModel):
 class OrderItemBase(BaseModel):
     product_id: int
     size: str
-    sweetness_level: int
+    sweetness_level: Optional[int] = None
     addons: Optional[List[AddonItem]] = None
     quantity: int = 1
     item_subtotal: Decimal
@@ -39,7 +39,7 @@ class OrderItemResponse(OrderItemBase):
 class OrderBase(BaseModel):
     guest_name: Optional[str] = None
     total_amount: Decimal
-    payment_method: PaymentMethod
+    payment_method: Optional[PaymentMethod] = None
 
 class OrderCreate(OrderBase):
     items: List[OrderItemCreate]
@@ -72,3 +72,7 @@ class OrderResponse(OrderBase):
     items: List[OrderItemResponse] = []
     
     model_config = {"from_attributes": True}
+
+
+class UpdateOrderStatusRequest(BaseModel):
+    status: OrderStatus

@@ -11,7 +11,9 @@ from app.schemas.order import (
     OrderCreateFromCartRequest,
     OrderQueueEstimateResponse,
     OrderResponse,
+    UpdateOrderStatusRequest,
 )
+from app.models.user import UserRole
 from app.services.order import OrderService
 
 router = APIRouter(prefix="/orders", tags=["Orders"])
@@ -67,6 +69,50 @@ def mark_order_paid(
     if not order:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
 
+    return order
+
+
+@router.get("/active", response_model=list[OrderResponse])
+def get_active_orders(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Get all active orders for staff"""
+    if current_user.role not in [UserRole.STAFF, UserRole.ADMIN]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
+    
+    orders = OrderService.get_active_orders(db)
+    
+    # Debugging: check one order to see if it matches schema
+    if orders:
+        print(f"DEBUG: Found {len(orders)} active orders")
+        for o in orders:
+            try:
+                # Test validation locally
+                OrderResponse.model_validate(o)
+            except Exception as e:
+                print(f"DEBUG: Validation failed for Order {o.order_number}: {str(e)}")
+    else:
+        print("DEBUG: No orders found in database")
+        
+    return orders
+
+
+@router.patch("/{order_id}/status", response_model=OrderResponse)
+def update_order_status(
+    order_id: UUID,
+    payload: UpdateOrderStatusRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Update order status for staff"""
+    if current_user.role not in [UserRole.STAFF, UserRole.ADMIN]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
+    
+    order = OrderService.update_order_status(db, order_id=order_id, new_status=payload.status)
+    if not order:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
+    
     return order
 
 

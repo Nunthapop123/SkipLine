@@ -304,3 +304,29 @@ class OrderService:
             .order_by(Order.created_at.desc())
             .all()
         )
+
+    @staticmethod
+    def get_active_orders(db: Session) -> list[Order]:
+        """Get all active orders (CONFIRMED, PREPARING, READY) for staff dashboard"""
+        return (
+            db.query(Order)
+            .options(
+                joinedload(Order.items)
+                .joinedload(OrderItem.product)
+            )
+            .filter(Order.status.in_([OrderStatus.CONFIRMED, OrderStatus.PREPARING, OrderStatus.READY]))
+            .order_by(Order.created_at.asc())
+            .all()
+        )
+
+    @staticmethod
+    def update_order_status(db: Session, *, order_id: UUID, new_status: OrderStatus) -> Order | None:
+        """Update an order's status and return the updated order"""
+        order = db.query(Order).filter(Order.id == order_id).first()
+        if not order:
+            return None
+        
+        order.status = new_status
+        db.commit()
+        db.refresh(order)
+        return order
