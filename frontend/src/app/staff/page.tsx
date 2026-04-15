@@ -28,7 +28,7 @@ export default function StaffIndexPage() {
         return;
       }
       // Valid staff/admin user, redirect to dashboard
-      router.push('/staff/dashborad');
+      router.push('/staff/dashboard');
     } catch (err) {
       // Invalid user data, redirect to login
       localStorage.removeItem('token');
