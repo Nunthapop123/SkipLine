@@ -1,41 +1,95 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { ArrowUpRight, CheckCircle2 } from "lucide-react";
 
 import Navbar from "../../../../components/Navbar";
 import Footer from "../../../../components/Footer";
+import { getOrderById, type OrderResponse } from "../../../data/orderApi";
 
-const transactionDetails = [
-  { label: "Order Number", value: "#67676767" },
-  { label: "Date & Time", value: "14/03/2026 1:20 AM" },
-  { label: "Payment method", value: "QR / PromptPay" },
-  { label: "Amount paid", value: "$67.00" },
-];
+const formatMoney = (value: number) => `$${value.toFixed(2)}`;
 
-const orderItems = [
-  {
-    id: "1",
-    name: "Ice Coffee",
-    size: "Size: Small (12 Oz)",
-    sweetness: "Sweetness: 100%",
-    addOns: "Add-ons: Extra shot, Caramel drizzle",
-    quantity: "Qty: 1",
-    price: "$19.99",
-    image: "/iceCoffee.png",
-  },
-  {
-    id: "2",
-    name: "Ice Coffee",
-    size: "Size: Small (12 Oz)",
-    sweetness: "Sweetness: 100%",
-    addOns: "Add-ons: Vanilla shot",
-    quantity: "Qty: 1",
-    price: "$19.99",
-    image: "/iceCoffee.png",
-  },
-];
+const formatPaymentMethod = (value: string) => {
+  if (value === "PROMPTPAY") return "QR / PromptPay";
+  if (value === "CREDIT_CARD") return "Credit Card";
+  if (value === "CASH") return "Cash";
+  return value;
+};
+
+const formatDateTime = (isoDate?: string | null) => {
+  if (!isoDate) return "-";
+  const date = new Date(isoDate);
+  if (Number.isNaN(date.getTime())) return "-";
+  return date.toLocaleString();
+};
+
+const formatPickupTime = (isoDate?: string | null) => {
+  if (!isoDate) return "--:--";
+  const date = new Date(isoDate);
+  if (Number.isNaN(date.getTime())) return "--:--";
+  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+};
 
 export default function TransactionSummaryPage() {
+  const searchParams = useSearchParams();
+  const orderId = searchParams.get("orderId");
+  const [order, setOrder] = useState<OrderResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadOrder = async () => {
+      if (!orderId) {
+        setOrder(null);
+        setIsLoading(false);
+        return;
+      }
+
+      const token = localStorage.getItem("token") || localStorage.getItem("auth_token");
+      if (!token) {
+        setOrder(null);
+        setIsLoading(false);
+        return;
+      }
+
+      const data = await getOrderById(token, orderId);
+      setOrder(data);
+      setIsLoading(false);
+    };
+
+    void loadOrder();
+  }, [orderId]);
+
+  const transactionDetails = useMemo(
+    () => [
+      { label: "Order Number", value: order?.order_number ?? "-" },
+      { label: "Date & Time", value: formatDateTime(order?.estimated_pickup_time) },
+      { label: "Payment method", value: order ? formatPaymentMethod(order.payment_method) : "-" },
+      { label: "Amount paid", value: order ? formatMoney(Number(order.total_amount || 0)) : "$0.00" },
+    ],
+    [order]
+  );
+
+  const orderItems = useMemo(
+    () =>
+      (order?.items || []).map((item) => ({
+        id: String(item.id),
+        name: item.product?.name || "Coffee",
+        size: `Size: ${item.size}`,
+        sweetness: `Sweetness: ${item.sweetness_level}%`,
+        addOns:
+          item.addons && item.addons.length > 0
+            ? `Add-ons: ${item.addons.map((addon) => addon.name).join(", ")}`
+            : "Add-ons: None",
+        quantity: `Qty: ${item.quantity}`,
+        price: formatMoney(Number(item.item_subtotal || 0)),
+        image: item.product?.image_url || "/iceCoffee.png",
+      })),
+    [order]
+  );
+
   return (
     <div className="flex min-h-screen flex-col bg-[#EDEBDF]">
       <Navbar />
@@ -62,10 +116,22 @@ export default function TransactionSummaryPage() {
                   </p>
                 </div>
                 <p className="shrink-0 whitespace-nowrap text-2xl font-extrabold leading-none sm:text-3xl">
-                  11:32 AM
+                  {formatPickupTime(order?.estimated_pickup_time)}
                 </p>
               </div>
             </section>
+
+            {isLoading && (
+              <div className="mt-6 rounded-xl bg-[#D9D9D9] px-4 py-3 text-sm font-semibold text-[#3D5690]">
+                Loading order details...
+              </div>
+            )}
+
+            {!isLoading && !order && (
+              <div className="mt-6 rounded-xl bg-[#D9D9D9] px-4 py-3 text-sm font-semibold text-[#3D5690]">
+                Order not found. Please return to transaction page and complete checkout.
+              </div>
+            )}
 
             <section className="mt-8 sm:mt-10">
               <h2 className="text-2xl font-bold leading-none sm:text-[1.7rem]">Transaction Details</h2>
@@ -86,6 +152,9 @@ export default function TransactionSummaryPage() {
               <h2 className="text-2xl font-bold leading-none sm:text-[1.7rem]">Your Order</h2>
               <div className="mt-4 rounded-2xl bg-[#D9D9D9] px-4 py-5 sm:px-6 sm:py-6">
                 <div className="space-y-6 sm:space-y-7">
+                  {!isLoading && orderItems.length === 0 && (
+                    <p className="text-sm font-semibold text-[#3D5690]/75 sm:text-base">No items found for this order.</p>
+                  )}
                   {orderItems.map((item) => (
                     <div key={item.id} className="flex items-start gap-4 sm:gap-5">
                       <div className="relative h-20 w-16 shrink-0 sm:h-24 sm:w-20">
