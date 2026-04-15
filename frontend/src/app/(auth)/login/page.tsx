@@ -1,6 +1,7 @@
 import Navbar from '../../../../components/Navbar'
 import LoginForm from '../../../../components/auth/LoginForm'
 import { ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 
 const LoginPage = () => {
   return (
@@ -18,11 +19,11 @@ const LoginPage = () => {
         
         <div className="flex flex-col items-center justify-center gap-3 text-center w-full max-w-lg">
           <p className="text-base text-[#3D5690]">
-            Don't have an account? <a href="/register" className="font-bold hover:underline">Sign up</a>
+            Don't have an account? <Link href="/register" className="font-bold hover:underline">Sign up</Link>
           </p>
-          <a href="/register" className="flex items-center gap-1 text-[#3D5690] opacity-70 text-base hover:opacity-100 transition-opacity mt-1">
+          <Link href="/staff/login" className="flex items-center gap-1 text-[#3D5690] opacity-70 text-base hover:opacity-100 transition-opacity mt-1">
             Staff Login <ArrowRight size={18} />
-          </a>
+          </Link>
         </div>
 
       </main>
