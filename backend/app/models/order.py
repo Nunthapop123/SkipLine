@@ -32,6 +32,7 @@ class Order(Base):
     total_amount = Column(Numeric(10, 2), nullable=False)
     payment_method = Column(Enum(PaymentMethod), nullable=False)
     payment_slip_url = Column(String, nullable=True)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
     estimated_pickup_time = Column(DateTime(timezone=True), nullable=True)
 
     items = relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")

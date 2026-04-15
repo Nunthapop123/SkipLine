@@ -67,6 +67,7 @@ class OrderResponse(OrderBase):
     customer_id: Optional[UUID] = None
     status: OrderStatus
     payment_slip_url: Optional[str] = None
+    created_at: Optional[datetime] = None
     estimated_pickup_time: Optional[datetime] = None
     items: List[OrderItemResponse] = []
     

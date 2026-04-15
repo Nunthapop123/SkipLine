@@ -65,7 +65,7 @@ export default function TransactionSummaryPage() {
   const transactionDetails = useMemo(
     () => [
       { label: "Order Number", value: order?.order_number ?? "-" },
-      { label: "Date & Time", value: formatDateTime(order?.estimated_pickup_time) },
+      { label: "Transaction Time", value: formatDateTime(order?.created_at) },
       { label: "Payment method", value: order ? formatPaymentMethod(order.payment_method) : "-" },
       { label: "Amount paid", value: order ? formatMoney(Number(order.total_amount || 0)) : "$0.00" },
     ],

@@ -30,6 +30,7 @@ export type OrderResponse = {
   payment_method: BackendPaymentMethod;
   status: string;
   payment_slip_url?: string | null;
+  created_at?: string | null;
   estimated_pickup_time?: string | null;
   items: OrderItemResponse[];
 };
