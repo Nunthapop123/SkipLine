@@ -13,6 +13,7 @@ type TransactionCheckoutFlowModalProps = {
   onConfirmReceipt: () => void;
   onRetry: () => void;
   onClose: () => void;
+  onContinue: () => void;
 };
 
 const formatMoney = (value: number) => `$${value.toFixed(2)}`;
@@ -26,6 +27,7 @@ export default function TransactionCheckoutFlowModal({
   onConfirmReceipt,
   onRetry,
   onClose,
+  onContinue,
 }: TransactionCheckoutFlowModalProps) {
   if (!step) return null;
 
@@ -113,16 +115,16 @@ export default function TransactionCheckoutFlowModal({
           <div className="mx-auto mt-7 w-full rounded-xl bg-[#D9D9D9] px-5 py-4">
             <div className="flex items-center justify-between gap-4">
               <p className="text-base font-semibold uppercase tracking-wide opacity-70">Order ID</p>
-              <p className="truncate text-xl font-bold leading-none md:text-2xl">{orderId || "Generating..."}</p>
+              <p className="truncate text-lg font-bold leading-none md:text-xl">{orderId || "Generating..."}</p>
             </div>
           </div>
 
           <div className="mt-7 flex gap-3">
             <button
-              onClick={onClose}
+              onClick={onContinue}
               className="h-13 flex-1 rounded-md border-2 border-[#3D5690] bg-transparent py-3 text-lg font-bold md:text-xl"
             >
-              Continue
+              View summary
             </button>
           </div>
         </div>
