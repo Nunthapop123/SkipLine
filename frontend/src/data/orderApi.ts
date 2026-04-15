@@ -26,7 +26,7 @@ export type OrderResponse = {
   id: string;
   order_number: string;
   guest_name?: string | null;
-  total_amount: number;
+  total_amount: number | string;
   payment_method: BackendPaymentMethod;
   status: string;
   payment_slip_url?: string | null;
@@ -131,5 +131,41 @@ export async function getUserOrders(token: string): Promise<OrderResponse[]> {
     return (await response.json()) as OrderResponse[];
   } catch {
     return [];
+  }
+}
+
+export async function getActiveOrders(token: string): Promise<OrderResponse[]> {
+  try {
+    const response = await fetch(`${API_BASE}/orders/active`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+
+    if (!response.ok) return [];
+    return (await response.json()) as OrderResponse[];
+  } catch {
+    return [];
+  }
+}
+
+export async function updateOrderStatus(
+  token: string, 
+  orderId: string, 
+  status: string
+): Promise<OrderResponse | null> {
+  try {
+    const response = await fetch(`${API_BASE}/orders/${orderId}/status`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ status }),
+    });
+
+    if (!response.ok) return null;
+    return (await response.json()) as OrderResponse;
+  } catch {
+    return null;
   }
 }
