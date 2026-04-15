@@ -31,6 +31,7 @@ const formatReadyAroundTime = (minutesFromNow: number) => {
   return readyAt.toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
+    hour12: false,
   });
 };
 
@@ -176,6 +177,17 @@ export default function TransactionPage() {
     return () => window.clearInterval(intervalId);
   }, [estimatedWait]);
 
+  useEffect(() => {
+    if (checkoutFlowStep !== "success" || !orderId) return;
+
+    const timeoutId = window.setTimeout(() => {
+      setCheckoutFlowStep(null);
+      router.push(`/transaction/summary?orderId=${encodeURIComponent(orderId)}`);
+    }, 5000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [checkoutFlowStep, orderId, router]);
+
   const subtotal = useMemo(
     () => cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
     [cartItems]
@@ -309,7 +321,7 @@ export default function TransactionPage() {
 
             <TransactionCartSummary
               cartItems={cartItems}
-              isLoading={isLoading || isSubmitting}
+              isLoading={isLoading}
               subtotal={subtotal}
               onCheckout={handleCheckoutClick}
             />
