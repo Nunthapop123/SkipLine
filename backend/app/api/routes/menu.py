@@ -3,6 +3,8 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.services.menu import MenuService
+from app.models.store import StoreSettings
+from app.schemas.store import StoreSettingsResponse
 
 router = APIRouter(prefix="/menu", tags=["Menu"])
 
@@ -30,3 +32,15 @@ def get_product(product_id: int, db: Session = Depends(get_db)):
         )
 
     return product
+
+
+@router.get("/settings", response_model=StoreSettingsResponse)
+def get_public_settings(db: Session = Depends(get_db)):
+    """Get public store settings (Busy Mode status)"""
+    settings = db.query(StoreSettings).first()
+    if not settings:
+        settings = StoreSettings()
+        db.add(settings)
+        db.commit()
+        db.refresh(settings)
+    return settings
