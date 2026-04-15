@@ -1,4 +1,3 @@
-import React from 'react';
 import Navbar from '../../../components/Navbar';
 import Footer from '../../../components/Footer';
 import ProductCard from '../../../components/menu/ProductCard';
@@ -9,15 +8,41 @@ import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { formatPrice, getMenuCategories, getMenuProducts } from '../../data/menuApi';
 
-const MenuPage = async () => {
+const MenuPage = async ({
+  searchParams,
+}: {
+  searchParams?: Promise<{ q?: string }> | { q?: string };
+}) => {
+  const resolvedSearchParams = await searchParams;
+  const query = (resolvedSearchParams?.q ?? '').trim();
+  const normalizedQuery = query.toLowerCase();
+
   const [categories, products] = await Promise.all([getMenuCategories(), getMenuProducts()]);
 
-  const productsByCategory = products.reduce<Record<string, typeof products>>((acc, product) => {
+  const filteredProducts = normalizedQuery
+    ? products.filter((product) => {
+        const searchable = [
+          product.name,
+          product.description ?? '',
+          product.category.name,
+        ]
+          .join(' ')
+          .toLowerCase();
+
+        return searchable.includes(normalizedQuery);
+      })
+    : products;
+
+  const productsByCategory = filteredProducts.reduce<Record<string, typeof products>>((acc, product) => {
     const key = product.category.slug;
     if (!acc[key]) acc[key] = [];
     acc[key].push(product);
     return acc;
   }, {});
+
+  const visibleCategories = categories.filter((category) => {
+    return (productsByCategory[category.slug] || []).length > 0;
+  });
 
   return (
     <div className="flex min-h-screen flex-col bg-[#EDEBDF]">
@@ -25,15 +50,53 @@ const MenuPage = async () => {
       <main className="container flex-1 mx-auto pt-24 px-4 pb-20">
         <div className="mx-auto max-w-6xl">
           <MenuBanner />
-          <MenuSearchBar />
+          <MenuSearchBar initialQuery={query} />
 
           <div className="flex flex-col md:flex-row gap-8">
             <CategoriesSidebar categories={categories} />
 
             <section className="flex-1 flex flex-col gap-14">
-              {categories.map((category) => {
-                const previewProducts = (productsByCategory[category.slug] || []).slice(0, 3);
-                
+              {normalizedQuery && (
+                <div>
+                  <h2 className="text-2xl font-bold text-[#3D5690]">
+                    Search results for "{query}"
+                  </h2>
+                  <p className="text-[#3D5690]/70 font-semibold mt-1">
+                    {filteredProducts.length} item{filteredProducts.length === 1 ? '' : 's'} found
+                  </p>
+
+                  {filteredProducts.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+                      {filteredProducts.map((product) => {
+                        const categoryImage = categories.find((c) => c.slug === product.category.slug)?.image_url;
+
+                        return (
+                          <ProductCard
+                            key={product.id}
+                            id={product.id}
+                            title={product.name}
+                            price={formatPrice(product.base_price)}
+                            imageSrc={product.image_url || categoryImage || '/hotCoffee.png'}
+                            description={product.description || undefined}
+                          />
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="bg-[#D9D9D9] rounded-2xl p-8 border border-[#3D5690]/10 mt-6">
+                      <h3 className="text-xl font-bold text-[#3D5690] mb-2">No products found</h3>
+                      <p className="text-[#3D5690]/70 font-semibold">
+                        Try another keyword or browse by category from the sidebar.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {!normalizedQuery && visibleCategories.map((category) => {
+                const categoryProducts = productsByCategory[category.slug] || [];
+                const previewProducts = categoryProducts.slice(0, 3);
+
                 return (
                   <div key={category.id}>
                     <div className="flex justify-between items-end mb-6 px-2">
@@ -44,12 +107,12 @@ const MenuPage = async () => {
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                       {previewProducts.map((product) => (
-                        <ProductCard 
-                          key={product.id} 
+                        <ProductCard
+                          key={product.id}
                           id={product.id}
-                          title={product.name} 
-                          price={formatPrice(product.base_price)} 
-                          imageSrc={product.image_url || category.image_url} 
+                          title={product.name}
+                          price={formatPrice(product.base_price)}
+                          imageSrc={product.image_url || category.image_url}
                           description={product.description || undefined}
                         />
                       ))}

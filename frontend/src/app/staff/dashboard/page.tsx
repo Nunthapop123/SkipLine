@@ -122,7 +122,7 @@ export default function StaffDashboardPage() {
 
                 {/* Done Column */}
                 <Column 
-                  title="Done" 
+                  title="Ready for Pickup" 
                   count={doneOrders.length} 
                   dotColor="bg-[#34C759]"
                 >
@@ -130,7 +130,8 @@ export default function StaffDashboardPage() {
                     <OrderCard 
                       key={order.id} 
                       order={order} 
-                      action="none" 
+                      action="pickup"
+                      onAction={() => handleStatusUpdate(order.id, 'COMPLETED')}
                     />
                   ))}
                 </Column>
@@ -166,7 +167,7 @@ function Column({ title, count, dotColor, children }: { title: string, count: nu
   );
 }
 
-function OrderCard({ order, action, onAction }: { order: OrderResponse, action: 'start' | 'done' | 'none', onAction?: () => void }) {
+function OrderCard({ order, action, onAction }: { order: OrderResponse, action: 'start' | 'done' | 'pickup' | 'none', onAction?: () => void }) {
   const formatAmount = (amount: number | string) => {
     const parsed = typeof amount === 'number' ? amount : Number(amount);
     return Number.isFinite(parsed) ? parsed.toFixed(2) : '0.00';
@@ -195,7 +196,7 @@ function OrderCard({ order, action, onAction }: { order: OrderResponse, action: 
     return `Done ${parsed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}`;
   };
 
-  const isDoneColumn = action === 'none';
+  const isDoneColumn = action === 'none' || action === 'pickup';
   const elapsedMinutes = getElapsedMinutes(order.created_at);
   const headerTimeLabel = isDoneColumn
     ? getFinishedTimeLabel(order.estimated_pickup_time, order.created_at)
@@ -275,7 +276,7 @@ function OrderCard({ order, action, onAction }: { order: OrderResponse, action: 
             onClick={onAction}
             className="bg-[#4C6291] text-white text-sm font-bold py-2.5 px-6 rounded-xl hover:bg-[#34456a] transition-all flex items-center gap-2 shadow-sm hover:shadow-md active:scale-95 group"
           >
-            Start <span className="text-xl leading-none pb-0.5 group-hover:translate-x-1 transition-transform">→</span>
+            Start
           </button>
         )}
         {action === 'done' && (
@@ -284,6 +285,14 @@ function OrderCard({ order, action, onAction }: { order: OrderResponse, action: 
             className="bg-[#4C6291] text-white text-sm font-bold py-2.5 px-8 rounded-xl hover:bg-[#34456a] transition-all shadow-sm hover:shadow-md active:scale-95"
           >
             Done
+          </button>
+        )}
+        {action === 'pickup' && (
+          <button
+            onClick={onAction}
+            className="bg-[#34C759] text-white text-sm font-bold py-2.5 px-6 rounded-xl hover:bg-[#26a34a] transition-all shadow-sm hover:shadow-md active:scale-95"
+          >
+            Picked Up
           </button>
         )}
       </div>

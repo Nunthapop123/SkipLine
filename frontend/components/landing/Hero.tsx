@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import Link from 'next/link'
 
 const Hero = () => {
   return (
@@ -18,9 +19,12 @@ const Hero = () => {
             <p className="text-[#3D5690] mb-3">
               SkipLine is a smarter way to get your daily drinks. We use a real-time queue system so you always know exactly how long your order will take without guessing, waiting in line. Just order, show up, and enjoy.
             </p>
-            <button className="text-start bg-[#3D5690] text-[#EDEBDF] rounded-[5px] px-4 py-2 w-fit">
+            <Link
+              href="/menu"
+              className="text-start bg-[#3D5690] text-[#EDEBDF] rounded-[5px] px-4 py-2 w-fit"
+            >
               Order Now
-            </button>
+            </Link>
           </div>
           <div className="w-1/4 mx-auto">
             <Image src="/kid-herosection.png" alt="Kid holding a cup" width={200} height={200} />

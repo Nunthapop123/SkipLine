@@ -12,7 +12,7 @@ import AddOnDisplay from '../../../../components/menu/(individual)/AddOnDisplay'
 import AddOnModal from '../../../../components/menu/(individual)/AddOnModal';
 import QuantitySelector from '../../../../components/menu/(individual)/QuantitySelector';
 import RelatedProducts from '../../../../components/menu/(individual)/RelatedProducts';
-import { getMenuProductById, type MenuProduct } from '../../../data/menuApi';
+import { getMenuProductById, getMenuProducts, type MenuProduct } from '../../../data/menuApi';
 import { addToBackendCart, type CartItem } from '../../../data/cartApi';
 
 interface AddOn {
@@ -34,6 +34,7 @@ const MenuItemPage = () => {
   const router = useRouter();
 
   const [product, setProduct] = useState<MenuProduct | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<MenuProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [size, setSize] = useState('Small');
   const [sweetness, setSweetness] = useState('50%');
@@ -53,6 +54,24 @@ const MenuItemPage = () => {
 
     loadProduct();
   }, [productId]);
+
+  useEffect(() => {
+    const loadRelatedProducts = async () => {
+      if (!product?.category?.slug) {
+        setRelatedProducts([]);
+        return;
+      }
+
+      const categoryProducts = await getMenuProducts(product.category.slug);
+      const filtered = categoryProducts
+        .filter((item) => item.id !== product.id && item.is_available)
+        .slice(0, 4);
+
+      setRelatedProducts(filtered);
+    };
+
+    loadRelatedProducts();
+  }, [product]);
 
   const handleRemoveAddOn = (id: string) => {
     setSelectedAddOns((prev) => prev.filter((item) => item.id !== id));
@@ -272,7 +291,7 @@ const MenuItemPage = () => {
           
         </div>
 
-        <RelatedProducts />
+        <RelatedProducts products={relatedProducts} />
 
       </main>
 

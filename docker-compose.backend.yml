@@ -1,0 +1,44 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: skipline-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: skipline
+      POSTGRES_USER: skipline_user
+      POSTGRES_PASSWORD: skipline_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - skipline_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U skipline_user -d skipline"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: skipline-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PYTHONPATH: /app
+      DATABASE_URL: postgresql://skipline_user:skipline_password@db:5432/skipline
+      SECRET_KEY: your-super-secret-key-change-this-in-production
+      API_HOST: 0.0.0.0
+      API_PORT: 8000
+      ENVIRONMENT: development
+      CORS_ORIGINS: '["http://localhost:3000","http://127.0.0.1:3000"]'
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+volumes:
+  skipline_pg_data:
