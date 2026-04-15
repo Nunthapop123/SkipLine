@@ -293,3 +293,14 @@ class OrderService:
             .filter(Order.id == order_id, Order.customer_id == user_id)
             .first()
         )
+
+    @staticmethod
+    def get_user_orders(db: Session, *, user_id: UUID) -> list[Order]:
+        """Get all orders for a user, sorted by created_at descending"""
+        return (
+            db.query(Order)
+            .options(joinedload(Order.items).joinedload(OrderItem.product))
+            .filter(Order.customer_id == user_id)
+            .order_by(Order.created_at.desc())
+            .all()
+        )
